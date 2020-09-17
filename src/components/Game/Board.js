@@ -2,11 +2,12 @@ import React, { Fragment } from "react";
 
 import Row from "./Row";
 
-export default function Board({ boardSize }) {
-    const board =[]
+export default function Board({ fireStoreData }) {
+    const {boardSize,board} = fireStoreData
+    const boardEle =[]
     for (let i = 0 ; i < boardSize ;i++) {
-        board.push(<Row boardSize={boardSize} key={i} />)
+        boardEle.push(<Row boardSize={boardSize} key={i} />)
     }
 
-    return <Fragment>{board}</Fragment>;
+    return <Fragment>{boardEle}</Fragment>;
 }
