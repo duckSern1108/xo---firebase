@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { randomID } from "../ultis";
 import firebase from "../firebase";
+
+//import { Link } from "react-router-dom";
 const LoginForm = (props) => {
     const { invited, docId, fireStoreData } = props;
-    let players = null
-    if (fireStoreData) players  = fireStoreData.players;
-    console.log(players)
+    let players = null;
+    if (fireStoreData) players = fireStoreData.players;
+    console.log(players);
     if (players) console.log("u can join");
     else console.log("u can not join");
 
@@ -20,33 +22,29 @@ const LoginForm = (props) => {
     const [username, setUsername] = useState();
     const [color, setColor] = useState();
     const [boardSize, setBoardSize] = useState(3);
+    const [ref, setRef] = useState("");
     const onSubmit = (e) => {
         e.preventDefault();
+        const playerData = {
+            ref: ref,
+            username: username,
+            color: color,
+            id: playerID,
+        };
+        sessionStorage.setItem('playerData',JSON.stringify(playerData))
         const db = firebase.firestore().collection("rooms");
         if (!invited) {
             db.add({
                 board: Array(boardSize * boardSize).fill(""),
                 boardSize: parseInt(boardSize),
-                players: [
-                    {
-                        ref: "X",
-                        username: username,
-                        color: color,
-                        id: playerID,
-                    },
-                ],
+                players: [playerData],
             }).then((data) => {
                 console.log(data.id);
                 setRoomId(data.id);
             });
         } else {
-            players.push({
-                ref: "X",
-                username: username,
-                color: color,
-                id: playerID,
-            })
-            console.log(players)
+            players.push(playerData);
+            console.log(players);
             db.doc(docId).update({
                 players: players,
             });
@@ -69,6 +67,13 @@ const LoginForm = (props) => {
                     onChange={(e) => setColor(e.target.value)}
                 />
                 <br />
+                <label>Pick your fav character </label>
+                <input
+                    type="text"
+                    value={ref}
+                    onChange={(e) => setRef(e.target.value)}
+                />
+                <br />
                 {!invited && (
                     <>
                         <label>Board size : </label>
@@ -79,9 +84,10 @@ const LoginForm = (props) => {
                             value={boardSize}
                             onChange={(e) => setBoardSize(e.target.value)}
                         />
+                        <br />
                     </>
                 )}
-                <br />
+
                 <input
                     type="submit"
                     value={invited ? "Join room" : "Create room"}

@@ -6,13 +6,17 @@ const cellStyle = {
     border: "1px solid black",
 };
 
-export default function Cell() {
+export default function Cell({ data, play, id, rowId }) {
+    const playerData = JSON.parse(sessionStorage.getItem('playerData'))
+    console.log('play',play)
     return (
         <button
             style={cellStyle}
             onClick={() => {
-                console.log("hello");
+                play(rowId, id, playerData.ref);
             }}
-        ></button>
+        >
+            {data}
+        </button>
     );
 }
