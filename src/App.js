@@ -8,7 +8,6 @@ import Game from "./screen/Game"
 
 //import router
 import {Switch,BrowserRouter as Router , Route} from "react-router-dom"
-
 //const App = React.createContext()
 function App() {
     return (

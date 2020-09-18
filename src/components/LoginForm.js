@@ -3,14 +3,9 @@ import { randomID } from "../ultis";
 import firebase from "../firebase";
 
 //import { Link } from "react-router-dom";
-const LoginForm = (props) => {
-    const { invited, docId, fireStoreData } = props;
-    let players = null;
-    if (fireStoreData) players = fireStoreData.players;
-    console.log(players);
-    if (players) console.log("u can join");
-    else console.log("u can not join");
-
+const LoginForm = ({ invited, docId, fireStoreData }) => {
+    let players = []
+    if (fireStoreData) players = fireStoreData.players
     const [roomId, setRoomId] = useState(docId);
 
     //random player Id
@@ -29,15 +24,16 @@ const LoginForm = (props) => {
             ref: ref,
             username: username,
             color: color,
-            id: playerID,
+            id: invited ? 1 : 0,
         };
-        sessionStorage.setItem('playerData',JSON.stringify(playerData))
+        sessionStorage.setItem("playerData", JSON.stringify(playerData));
         const db = firebase.firestore().collection("rooms");
         if (!invited) {
             db.add({
                 board: Array(boardSize * boardSize).fill(""),
                 boardSize: parseInt(boardSize),
                 players: [playerData],
+                turn: 1,
             }).then((data) => {
                 console.log(data.id);
                 setRoomId(data.id);

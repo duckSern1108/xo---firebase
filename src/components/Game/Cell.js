@@ -6,15 +6,15 @@ const cellStyle = {
     border: "1px solid black",
 };
 
-export default function Cell({ data, play, id, rowId }) {
+export default function Cell({ data, play, id, rowId,turn }) {
     const playerData = JSON.parse(sessionStorage.getItem('playerData'))
-    console.log('play',play)
     return (
         <button
             style={cellStyle}
             onClick={() => {
                 play(rowId, id, playerData.ref);
             }}
+            disabled={data !== "" || playerData.id !== turn}
         >
             {data}
         </button>

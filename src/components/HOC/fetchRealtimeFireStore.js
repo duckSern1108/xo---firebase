@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 
 import firebase from "firebase";
 
-const fetchFireStore = (collection) => (docId) => (WrappedComponent) => {
-    const FetchFireStore = (props) => {
+const fetchRealTimeFireStore = (collection) => (docId) => (WrappedComponent) => {
+    const FetchRealTimeFireStore = (props) => {
         const [data, setData] = useState({});
         useEffect(() => {
             const unSub = firebase
@@ -18,7 +18,7 @@ const fetchFireStore = (collection) => (docId) => (WrappedComponent) => {
         }, []);
         return <WrappedComponent fireStoreData={data} {...props} />;
     };
-    return FetchFireStore;
+    return FetchRealTimeFireStore;
 };
 
-export default fetchFireStore;
+export default fetchRealTimeFireStore;

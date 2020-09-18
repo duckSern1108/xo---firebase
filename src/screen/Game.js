@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom";
 
 import Board from "../components/Game/Board";
 
-import fetchFireStore from "../components/HOC/fetchFireStore";
+import fetchRealtimeFireStore from "../components/HOC/fetchRealtimeFireStore";
 
 const Game = () => {
     const { id } = useParams();
-    const BoardGame = fetchFireStore("rooms")(id)(Board);
+    const BoardGame = fetchRealtimeFireStore("rooms")(id)(Board);
     return <BoardGame docId={id}/>;
 };
 
