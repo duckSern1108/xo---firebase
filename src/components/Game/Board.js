@@ -1,10 +1,12 @@
-import React, { Fragment} from "react";
+import React, { Fragment } from "react";
 
 import Row from "./Row";
 
-import { updateFireStore, updateTurn,findWinner } from "../../ultis";
+import { updateFireStore, updateTurn, findWinner } from "../../ultis";
+import firebase from "../../firebase";
 
-
+import {Link} from 'react-router-dom';
+import Button from "@material-ui/core/Button"
 export default function Board({ fireStoreData, docId }) {
     const { boardSize, board, turn, players } = fireStoreData;
     const rowsData = [];
@@ -29,14 +31,32 @@ export default function Board({ fireStoreData, docId }) {
         });
     };
     const restartGame = () => {
-        updateFireStore(docId,{
+        updateFireStore(docId, {
             board: Array(boardSize * boardSize).fill(""),
             boardSize: parseInt(boardSize),
             players: players,
             turn: 0,
-        })
-    }
-    const [winMoves,winnerPlayer] = findWinner(board,boardSize)
+        });
+    };
+    const handleLeave = () => {
+        if (players.length === 1) {
+            firebase
+                .firestore()
+                .collection("rooms")
+                .doc(docId)
+                .delete()
+                .then(() => console.log("delete"));
+        } else {
+            const { playerId } = JSON.parse(
+                sessionStorage.getItem("playerData")
+            );
+            const newPLayers = players.filter(
+                (player) => player.playerId !== playerId
+            );
+            updateFireStore(docId,{ players: newPLayers });
+        }
+    };
+    const [winMoves, winnerPlayer] = findWinner(board, boardSize);
     if (players)
         return (
             <Fragment>
@@ -73,6 +93,10 @@ export default function Board({ fireStoreData, docId }) {
                 }
                 <div>{winnerPlayer}</div>
                 {winMoves && <button onClick={restartGame}>Restart</button>}
+                <Button onClick={handleLeave} component={Link} to="/" variant="outlined" color="primary">
+                    leave
+                </Button>
+                
             </Fragment>
         );
     else return <div>Loading...</div>;
