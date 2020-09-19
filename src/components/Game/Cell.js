@@ -1,20 +1,40 @@
 import React from "react";
 
-const cellStyle = {
-    width: "50px",
-    height: "50px",
-    border: "1px solid black",
-};
-
-export default function Cell({ data, play, id, rowId,turn }) {
-    const playerData = JSON.parse(sessionStorage.getItem('playerData'))
+export default function Cell({
+    data,
+    play,
+    id,
+    rowId,
+    turn,
+    winnerPLayer,
+    winMoves,
+    boardSize,
+}) {
+    const { playerId, ref, color } = JSON.parse(
+        sessionStorage.getItem("playerData")
+    );
+    let isInWinMoves;
+    if (winMoves)
+        isInWinMoves = winMoves.some((move) => rowId * boardSize + id === move);
+    const cellStyle = {
+        width: "50px",
+        height: "50px",
+        border: "1px solid black",
+        fontWeight: 600,
+        color: color,
+        background: isInWinMoves && "yellow",
+    };
     return (
         <button
             style={cellStyle}
             onClick={() => {
-                play(rowId, id, playerData.ref);
+                play(rowId, id, ref);
             }}
-            disabled={data !== "" || playerData.id !== turn}
+            disabled={
+                data !== "" ||
+                parseInt(playerId) !== turn ||
+                winnerPLayer !== ""
+            }
         >
             {data}
         </button>

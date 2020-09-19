@@ -1,22 +1,17 @@
-import React, { useState } from "react";
-import { randomID } from "../ultis";
+import React, { Fragment,useState } from "react";
 import firebase from "../firebase";
+
 
 //import { Link } from "react-router-dom";
 const LoginForm = ({ invited, docId, fireStoreData }) => {
     let players = []
     if (fireStoreData) players = fireStoreData.players
-    const [roomId, setRoomId] = useState(docId);
-
-    //random player Id
-    const playerID = randomID(6);
-    sessionStorage.playerID = playerID;
-    console.log(playerID);
+    const [roomId, setRoomId] = useState("");
 
     //form data + handler
     const [username, setUsername] = useState();
     const [color, setColor] = useState();
-    const [boardSize, setBoardSize] = useState(3);
+    const [boardSize, setBoardSize] = useState(5);
     const [ref, setRef] = useState("");
     const onSubmit = (e) => {
         e.preventDefault();
@@ -24,30 +19,25 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
             ref: ref,
             username: username,
             color: color,
-            id: invited ? 1 : 0,
+            playerId: players.length,
         };
-        sessionStorage.setItem("playerData", JSON.stringify(playerData));
+        sessionStorage.setItem('playerData',JSON.stringify(playerData))
+        players.push(playerData);
+        //update data to firebase
         const db = firebase.firestore().collection("rooms");
         if (!invited) {
             db.add({
                 board: Array(boardSize * boardSize).fill(""),
                 boardSize: parseInt(boardSize),
-                players: [playerData],
-                turn: 1,
-            }).then((data) => {
-                console.log(data.id);
-                setRoomId(data.id);
-            });
-        } else {
-            players.push(playerData);
-            console.log(players);
-            db.doc(docId).update({
                 players: players,
-            });
+                turn: 0,
+            }).then(data => setRoomId(data.id));
+        } else {
+            db.doc(docId).update({ players: players });
         }
     };
     return (
-        <>
+        <Fragment>
             <form onSubmit={onSubmit}>
                 <label>Username :</label>
                 <input
@@ -58,7 +48,7 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
                 <br />
                 <label>Pick a color : </label>
                 <input
-                    type="text"
+                    type="color"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
                 />
@@ -75,8 +65,8 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
                         <label>Board size : </label>
                         <input
                             type="number"
-                            min={3}
-                            max={10}
+                            min={5}
+                            max={100}
                             value={boardSize}
                             onChange={(e) => setBoardSize(e.target.value)}
                         />
@@ -90,7 +80,7 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
                 />
             </form>
             {roomId && <p>Invite link : {`/?${roomId}`}</p>}
-        </>
+        </Fragment>
     );
 };
 

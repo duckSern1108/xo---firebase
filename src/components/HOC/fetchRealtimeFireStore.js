@@ -11,7 +11,6 @@ const fetchRealTimeFireStore = (collection) => (docId) => (WrappedComponent) => 
                 .collection(collection)
                 .doc(docId)
                 .onSnapshot((snapshot) => {
-                    console.log(snapshot.data());
                     setData(snapshot.data());
                 });
             return unSub;
