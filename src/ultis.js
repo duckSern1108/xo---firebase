@@ -7,8 +7,6 @@ function updateFireStore(docId, updateField) {
     firebase.firestore().collection("rooms").doc(docId).update(updateField);
 }
 function findWinner(board, boardSize) {
-    let winner = [];
-    let winnerPlayer = "";
     const winPattern = [
         [0, 1, 2, 3, 4],
         [5, 6, 7, 8, 9],
@@ -24,29 +22,30 @@ function findWinner(board, boardSize) {
         [20, 16, 12, 8, 4],
     ];
     for (let i = 0; i < boardSize - 4; i++) {
-        if (winner.length > 0) {
-            break;
-        }
         for (let j = 0; j < boardSize - 4; j++) {
+            //create mini 5x5 board
             const miniBoard = [];
             for (let m = 0; m < 5; m++) {
                 for (let n = 0; n < 5; n++) {
                     miniBoard.push(board[(i + m) * boardSize + (j + n)]);
                 }
             }
-            winner = winPattern.filter((win) =>
+            const move = winPattern.filter((win) =>
                 win.every(
                     (pos) =>
                         miniBoard[pos] === miniBoard[win[0]] &&
                         miniBoard[win[0]] !== ""
                 )
             );
-            if (winner.length > 0) {
-                winnerPlayer = board[winner[0][0]];
-                break;
+            if (move.length > 0) {
+                const winMoves = move[0].map(
+                    (move) =>
+                        (i + parseInt(move / 5)) * boardSize + (move % 5) + j
+                );
+                return [winMoves, board[winMoves[0]]];
             }
         }
     }
-    return [winner[0], winnerPlayer];
+    return [undefined, ""];
 }
 export { updateFireStore, updateTurn, findWinner };

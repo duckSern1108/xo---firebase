@@ -6,23 +6,21 @@ export default function Cell({
     id,
     rowId,
     turn,
-    winnerPLayer,
+    winner,
     winMoves,
     boardSize,
 }) {
     const { playerId, ref, color } = JSON.parse(
         sessionStorage.getItem("playerData")
     );
-    let isInWinMoves;
-    if (winMoves)
-        isInWinMoves = winMoves.some((move) => rowId * boardSize + id === move);
+    const haveWinner = winMoves.some((move) => rowId * boardSize + id === move);
     const cellStyle = {
         width: "50px",
         height: "50px",
         border: "1px solid black",
         fontWeight: 600,
         color: color,
-        background: isInWinMoves && "yellow",
+        background: haveWinner && "yellow",
     };
     return (
         <button
@@ -33,7 +31,7 @@ export default function Cell({
             disabled={
                 data !== "" ||
                 parseInt(playerId) !== turn ||
-                winnerPLayer !== ""
+                winner !== ""
             }
         >
             {data}

@@ -2,7 +2,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 
 import fetchRealTimeFireStore from "../components/HOC/fetchRealtimeFireStore";
-import LoginForm from "../components/LoginForm"
+import LoginForm from "../components/Login/LoginForm"
 
 const Login = () => {
     const location = useLocation();

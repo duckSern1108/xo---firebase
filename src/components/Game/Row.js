@@ -10,7 +10,7 @@ export default function Row({
     rowData,
     rowId,
     turn,
-    winnerPlayer,
+    winner,
     boardSize,
     winMoves,
 }) {
@@ -20,7 +20,7 @@ export default function Row({
                 <Cell
                     winMoves={winMoves}
                     boardSize={boardSize}
-                    winnerPLayer={winnerPlayer}
+                    winner={winner}
                     turn={turn}
                     key={index}
                     id={index}
