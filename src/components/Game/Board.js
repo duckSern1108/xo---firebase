@@ -9,8 +9,8 @@ import { Link } from "react-router-dom";
 //import UIcomponent
 import Button from "@material-ui/core/Button";
 
-export default function Board({ fireStoreData, docId }) {
-    const { boardSize, board, turn, players, winner, winMoves } = fireStoreData;
+export default function Board({ realTimeData, docId }) {
+    const { boardSize, board, turn, players, winner, winMoves } = realTimeData;
     //when user draw on board
     const play = (rowId, id, ref) => {
         board[rowId * boardSize + id] = ref;

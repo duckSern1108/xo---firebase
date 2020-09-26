@@ -1,3 +1,4 @@
+import { InCompleteFormAlert } from "./InCompleteFormAlert";
 import React, { useState } from "react";
 
 import firebase from "../../firebase";
@@ -9,11 +10,11 @@ import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import { Link } from "react-router-dom";
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 
 //import Logo
 import logo from "../../images/logo.png";
@@ -42,7 +43,7 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
     const [color, setColor] = useState();
     const [boardSize, setBoardSize] = useState(5);
     const [ref, setRef] = useState("");
-    const [open,setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
     const onSubmit = (e) => {
         e.preventDefault();
         if (username && color && ref) {
@@ -55,16 +56,26 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
             sessionStorage.setItem("playerData", JSON.stringify(playerData));
             players.push(playerData);
             //update data to firebase
-            const db = firebase.firestore().collection("rooms");
+            const db = firebase.database().ref().push(); // root database
+            setRoomId(db.key);
+            // const db = firebase.firestore().collection("rooms");
             if (!invited) {
-                db.add({
+                db.set({
                     board: Array(boardSize * boardSize).fill(""),
                     boardSize: parseInt(boardSize),
                     players: players,
                     turn: 0,
                     winner: "",
-                    winMoves: [],
-                }).then((data) => setRoomId(data.id));
+                    winMoves: [-1],
+                });
+                // db.add({
+                //     board: Array(boardSize * boardSize).fill(""),
+                //     boardSize: parseInt(boardSize),
+                //     players: players,
+                //     turn: 0,
+                //     winner: "",
+                //     winMoves: [],
+                // }).then((data) => setRoomId(data.id));
             } else {
                 db.doc(docId).update({ players: players });
             }
@@ -124,25 +135,7 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
                 >
                     {invited ? "Join room" : "Create room"}
                 </StyledButton>
-                <Dialog
-                    open={open}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                >
-                    <DialogTitle>
-                        Form is not fullfilled
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
-                            May be you didn't fill in some field
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button  color="primary" onClick={() => setOpen(false)} autoFocus>
-                            Okay
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                <InCompleteFormAlert open={open} setOpen={setOpen} />
                 {roomId && (
                     <>
                         <StyledButton
