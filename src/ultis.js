@@ -3,9 +3,14 @@ import firebase from "firebase";
 const updateTurn = (curTurn, maxPlayers) =>
     curTurn === maxPlayers - 1 ? 0 : curTurn + 1;
 
-function updateFireStore(docId, updateField) {
+//firestore
+const updateFireStore = (docId, updateField) =>
     firebase.firestore().collection("rooms").doc(docId).update(updateField);
-}
+
+//realtime database
+const updateRealtimeData = (location, updateData) =>
+    firebase.database().ref(location).update(updateData);
+
 function findWinner(board, boardSize) {
     const winPattern = [
         [0, 1, 2, 3, 4],
@@ -48,4 +53,7 @@ function findWinner(board, boardSize) {
     }
     return [undefined, ""];
 }
-export { updateFireStore, updateTurn, findWinner };
+const deleteRoom = (location) => 
+    firebase.database().ref(location).remove()
+
+export { updateFireStore, updateTurn, findWinner,updateRealtimeData,deleteRoom };

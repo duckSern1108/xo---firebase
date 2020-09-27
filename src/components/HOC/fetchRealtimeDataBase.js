@@ -6,12 +6,14 @@ const fetchRealTimeDatabase = (dataLocation) => (WrappedComponent) => {
     const FetchRealTimeDatabase = (props) => {
         const [data, setData] = useState({});
         useEffect(() => {
-            firebase.database().ref(dataLocation).on('value', snapshot => {
+            const db = firebase.database().ref(dataLocation)
+            db.on('value', snapshot => {
                 console.log(snapshot.val())
                 setData(snapshot.val())
             })
+            db.onDisconnect().remove()
             return () => {
-                firebase.database().ref(dataLocation).off()
+                db.off()
             }
         }, []);
         return <WrappedComponent realTimeData={data} {...props} />;

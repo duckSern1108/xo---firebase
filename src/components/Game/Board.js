@@ -2,29 +2,35 @@ import React, { Fragment } from "react";
 
 import Row from "./Row";
 
-import { updateFireStore, updateTurn, findWinner } from "../../ultis";
-import firebase from "../../firebase";
+import {
+    updateTurn,
+    findWinner,
+    updateRealtimeData,
+    deleteRoom
+} from "../../ultis";
 
+import LoadingData from '../All/LoadingData'
 import { Link } from "react-router-dom";
 //import UIcomponent
 import Button from "@material-ui/core/Button";
 
 export default function Board({ realTimeData, docId }) {
     const { boardSize, board, turn, players, winner, winMoves } = realTimeData;
+    const dataLocation = `/${docId}`
     //when user draw on board
     const play = (rowId, id, ref) => {
         board[rowId * boardSize + id] = ref;
-        updateFireStore(docId, {
+        updateRealtimeData(dataLocation, {
             board: board,
             turn: updateTurn(turn, players.length),
         });
     };
     //change turn in start round from radio button
-    const handleChange = (id) => {
-        updateFireStore(docId, {
-            turn: id,
-        });
-    };
+    // const handleChange = (id) => {
+    //     updateFireStore(docId, {
+    //         turn: id,
+    //     });
+    // };
     //get all row data
     const rowsData = [];
     for (let i = 0; i < boardSize; i++) {
@@ -36,25 +42,20 @@ export default function Board({ realTimeData, docId }) {
     }
     //restart game
     const restartGame = () => {
-        updateFireStore(docId, {
+        updateRealtimeData(dataLocation,{
             board: Array(boardSize * boardSize).fill(""),
             boardSize: parseInt(boardSize),
             players: players,
             turn: 0,
-            winner : "",
-            winMoves : []
-        });
+            winner: "",
+            winMoves: [],
+        })
     };
     //leave room
     const handleLeave = () => {
         //if there is only one user left in room
         if (players.length === 1) {
-            firebase
-                .firestore()
-                .collection("rooms")
-                .doc(docId)
-                .delete()
-                .then(() => console.log("delete"));
+            deleteRoom(`/${docId}`)
         } else {
             //more than one just delete player data in players
             const { playerId } = JSON.parse(
@@ -63,21 +64,21 @@ export default function Board({ realTimeData, docId }) {
             const newPLayers = players.filter(
                 (player) => player.playerId !== playerId
             );
-            updateFireStore(docId, { players: newPLayers });
+            updateRealtimeData(`/${docId}`,{ players: newPLayers })
         }
     };
     //find winner
     const [newWinMoves, newWinner] = findWinner(board, boardSize);
     //if have winner
     if (newWinMoves)
-        updateFireStore(docId, {
+        updateRealtimeData(`/${docId}`, {
             winner: newWinner,
             winMoves: newWinMoves,
         });
     if (players)
         return (
             <Fragment>
-                <label>Who go first : </label>
+                {/* <label>Who go first : </label>
                 {players.map((playerData, index) => {
                     return (
                         <Fragment key={index}>
@@ -91,7 +92,7 @@ export default function Board({ realTimeData, docId }) {
                             </label>
                         </Fragment>
                     );
-                })}
+                })} */}
 
                 {
                     //game field
@@ -129,5 +130,6 @@ export default function Board({ realTimeData, docId }) {
                 </Button>
             </Fragment>
         );
-    else return <div>Loading...</div>;
+    else return <LoadingData/>;
 }
+  
