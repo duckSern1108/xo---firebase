@@ -1,5 +1,5 @@
 import { InCompleteFormAlert } from "./InCompleteFormAlert";
-import React, { useState } from "react";
+import React, { useState ,useEffect } from "react";
 
 import firebase from "../../firebase";
 
@@ -14,8 +14,7 @@ import { Link } from "react-router-dom";
 //import Logo
 import logo from "../../images/logo.png";
 import { MenuItem } from "@material-ui/core";
-//import { Link } from "react-router-dom";
-
+import LoadingOverView from '../../components/LoadingOverView'
 const StyledTextField = withStyles({
     root: {
         margin: "10px",
@@ -27,10 +26,24 @@ const StyledButton = withStyles({
         margin: "10px",
     },
 })(Button);
-const LoginForm = ({ invited, docId, fireStoreData }) => {
-    let players = [];
-    if (fireStoreData) players = fireStoreData.players;
+const LoginForm = ({ invited, docId}) => {
+    const location = `/${docId}`
+    const [data,setData] = useState({players : []})
+    const [isLoading,setIsLoading] = useState(true)
+    const {players} = data
+    useEffect(() => {
+        if (invited) {
+            firebase.database().ref(location).once('value').then(snapshot => {
+                setIsLoading(false)
+                setData(snapshot.val())
+            })
+        }
+        else {
+            setIsLoading(false)
+        }
 
+
+    },[])
     const [roomId, setRoomId] = useState("");
 
     //form data + handler
@@ -39,44 +52,35 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
     const [boardSize, setBoardSize] = useState(5);
     const [ref, setRef] = useState("");
     const [open, setOpen] = useState(false);
-    const onSubmit = (e) => {
-        e.preventDefault();
-        if (username && color && ref) {
+    const onSubmit = () => {
+        if (username && color && ref.length === 1) {
             const playerData = {
                 ref: ref,
                 username: username,
                 color: color,
-                playerId: players.length,
+                playerId: players ? players.length : 0,
             };
             sessionStorage.setItem("playerData", JSON.stringify(playerData));
-            players.push(playerData);
-            //update data to firebase
-            const db = firebase.database().ref().push(); // root database
-            setRoomId(db.key);
-            // const db = firebase.firestore().collection("rooms");
+
             if (!invited) {
+                const db = firebase.database().ref().push()
                 db.set({
                     board: Array(boardSize * boardSize).fill(""),
                     boardSize: parseInt(boardSize),
-                    players: players,
+                    players: [playerData],
                     turn: 0,
                     winner: "",
                     winMoves: [-1],
                 });
-                // db.add({
-                //     board: Array(boardSize * boardSize).fill(""),
-                //     boardSize: parseInt(boardSize),
-                //     players: players,
-                //     turn: 0,
-                //     winner: "",
-                //     winMoves: [],
-                // }).then((data) => setRoomId(data.id));
+                setRoomId(db.key);
             } else {
-                db.doc(docId).update({ players: players });
+                players.push(playerData);
+                firebase.database().ref(location).update({ players: players }).then(() => window.location = `/${docId}`);
             }
         } else setOpen(true);
     };
-    return (
+    if (isLoading) return <LoadingOverView />
+    else return (
         <div className={styles.container}>
             <div className={styles.formContainer}>
                 <img src={logo} alt="logo" />
@@ -90,14 +94,12 @@ const LoginForm = ({ invited, docId, fireStoreData }) => {
                 />
                 <br />
                 <StyledTextField
-                    select
+
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
                     label="Choose your fav color"
                     variant="outlined"
-                >
-                    <MenuItem value="red">red</MenuItem>
-                </StyledTextField>
+                />
                 <br />
                 <StyledTextField
                     label="Fav character"

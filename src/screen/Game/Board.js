@@ -9,14 +9,18 @@ import {
     deleteRoom
 } from "../../ultis";
 
-import LoadingData from '../All/LoadingData'
+import LoadingOverView from '../../components/LoadingOverView'
 import { Link } from "react-router-dom";
 //import UIcomponent
 import Button from "@material-ui/core/Button";
-
-export default function Board({ realTimeData, docId }) {
-    const { boardSize, board, turn, players, winner, winMoves } = realTimeData;
+import Container from "@material-ui/core/Container";
+import Typography from "@material-ui/core/Typography";
+import useFirebaseRealtimeDatabase from '../../Hooks/useFirebaseRealtimeDatabase'
+export default function Board({ docId }) {
     const dataLocation = `/${docId}`
+    const [data,isLoading] = useFirebaseRealtimeDatabase(dataLocation)
+    const { boardSize, board, turn, players, winner, winMoves } = data;
+
     //when user draw on board
     const play = (rowId, id, ref) => {
         board[rowId * boardSize + id] = ref;
@@ -25,12 +29,7 @@ export default function Board({ realTimeData, docId }) {
             turn: updateTurn(turn, players.length),
         });
     };
-    //change turn in start round from radio button
-    // const handleChange = (id) => {
-    //     updateFireStore(docId, {
-    //         turn: id,
-    //     });
-    // };
+
     //get all row data
     const rowsData = [];
     for (let i = 0; i < boardSize; i++) {
@@ -48,7 +47,7 @@ export default function Board({ realTimeData, docId }) {
             players: players,
             turn: 0,
             winner: "",
-            winMoves: [],
+            winMoves: [-1],
         })
     };
     //leave room
@@ -75,25 +74,18 @@ export default function Board({ realTimeData, docId }) {
             winner: newWinner,
             winMoves: newWinMoves,
         });
-    if (players)
+    function logPlayerName() {
+        let s = ''
+        players && players.forEach(({username,ref},i) =>{s+= `${username} as ${ref} \n`})
+        return s
+    }
+    if (!isLoading)
         return (
-            <Fragment>
-                {/* <label>Who go first : </label>
-                {players.map((playerData, index) => {
-                    return (
-                        <Fragment key={index}>
-                            <input
-                                type="radio"
-                                checked={turn === index}
-                                onChange={() => handleChange(index)}
-                            />
-                            <label>
-                                {index}. {playerData.username}
-                            </label>
-                        </Fragment>
-                    );
-                })} */}
-
+            <Container style={{padding : "2rem 0"}}>
+                <div style={{marginBottom : "2rem"}}>
+                    <Typography>Players : </Typography>
+                    {logPlayerName()}
+                </div>
                 {
                     //game field
                     rowsData.map((rowData, index) => (
@@ -106,30 +98,33 @@ export default function Board({ realTimeData, docId }) {
                             rowId={index}
                             turn={turn}
                             winner={winner}
+                            players={players}
                         />
                     ))
                 }
-                <div>{winner}</div>
-                {winMoves && (
+                <Typography style={{marginTop : "2rem"}}>Winner : {winner}</Typography>
+                <div >
+                    {winMoves && (
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={restartGame}
+                        >
+                            Restart
+                        </Button>
+                    )}
                     <Button
+                        onClick={handleLeave}
+                        component={Link}
+                        to="/"
                         variant="outlined"
                         color="primary"
-                        onClick={restartGame}
                     >
-                        Restart
+                        leave
                     </Button>
-                )}
-                <Button
-                    onClick={handleLeave}
-                    component={Link}
-                    to="/"
-                    variant="outlined"
-                    color="primary"
-                >
-                    leave
-                </Button>
-            </Fragment>
+                </div>
+
+            </Container>
         );
-    else return <LoadingData/>;
+    else return <LoadingOverView/>;
 }
-  

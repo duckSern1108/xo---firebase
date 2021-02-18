@@ -13,6 +13,7 @@ export default function Row({
     winner,
     boardSize,
     winMoves,
+    players
 }) {
     return (
         <div style={rowStyle}>
@@ -27,6 +28,7 @@ export default function Row({
                     rowId={rowId}
                     data={data}
                     play={play}
+                    players={players}
                 />
             ))}
         </div>
